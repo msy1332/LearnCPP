@@ -1,28 +1,128 @@
 {
-    "tasks": [
+    "version": "2.0.0", // 指定配置文件遵循的格式版本
+    "tasks": [ //来自定义任务
+        // 编译任务，用于编译C++程序
         {
-            "type": "cppbuild",
-            "label": "C/C++: gcc 生成活动文件",
-            "command": "/usr/bin/gcc",
+            "label": "Compilation c++ program", // 设置任务的名称（任务的名称是任务的唯一标识）
+            "type": "shell", // 指定如何执行命令
+            "windows": { // windows平台
+                "command": "g++", // 指定要执行的命令
+                "args": [ // 指定命令行参数
+                    "-g", // 生成调试信息
+                    "\"${file}\"", // 指定要编译哪个文件
+                    "-o", // 指定可执行文件的输出目录
+                    "\"${workspaceFolder}/bin/${fileBasenameNoExtension}.exe\"" // 来指定输出目录
+                ],
+            },
+            "linux": { // Linux平台执行的命令
+                "command": "g++", // 指定要执行的命令
+                "args": [ // 指定命令行参数
+                    "-g", // 生成调试信息
+                    "\"${file}\"", // 指定要编译哪个文件
+                    "-o", // 指定可执行文件的输出目录
+                    "\"${workspaceFolder}/bin/${fileBasenameNoExtension}\"" // 来指定输出目录
+                ],
+            },
+            "group": { // 任务分组
+                "kind": "build", // 将任务归类为构建任务
+                "isDefault": true // 设置默认构建任务（Ctrl + shift + B键触发）
+            },
+            "problemMatcher": "$gcc", // 指定问题匹配器，用于解析编译错误
+            "presentation": { // 指定控制终端的显示方式
+                "echo": true, // 是否在终端中显示执行命令
+                "reveal": "always", // 控制何时自动显示终端面板，always表示任务执行时总是显示终端面板
+                "focus": false, // 当任务执行时是否聚焦到终端上
+                "panel": "shared", // 指定任务是哪个终端面板，dedicated表示的就是为每个任务创建独立的终端面板（但同一个任务会重用此终端面板），而 shared表示的就是多个任务共享同一终端面板
+                "showReuseMessage": true, // 指定当终端被重用是是否显示一则提示消息
+                "clear": true // 指定当任务执行前是否终端面板已有的内容
+            }
+        },
+        // 运行任务，用于运行C++程序
+        {
+            "label": "Run c++ program", // 设置任务的名称（任务的名称是任务的唯一标识）
+            "type": "shell",
+            "windows": { // windows平台
+                // "command": "\"${workspaceFolder}/bin/${fileBasenameNoExtension}.exe\" && pause", // 指定要执行的命令
+                "command": "start cmd /k \"${workspaceFolder}/bin/${fileBasenameNoExtension}.exe\" && pause", // 指定要执行的命令
+            },
+            "linux": { // Linux平台
+                "command": "${workspaceFolder}/bin/${fileBasenameNoExtension}", // 指定要执行的命令
+                // "command": "gnome-terminal",
+                // "args": [
+                //     "--", // 指定之后的参数将会作为新建的终端要执行的命令
+                //     "bash", // 指定在新建的终端之后终端中启动 bash 作为解释器
+                //     "-c", // 告诉 bash将后面跟随的字符串作为命令
+                //     "./\"${workspaceFolder}/bin/${fileBasenameNoExtension}\";echo 'Press any key to close...'; read -n 1"
+                // ]
+            },
+        },
+        // 复合任务，用于编译并运行C++程序
+        {
+            "label": "Compilation and Run c++ program", // 设置任务的名称（任务的名称是任务的唯一标识）
+            // "command" : "echo Currently Compilation and Run c++ program", // 指定要执行的命令
+            "dependsOrder": "sequence", // 指定任务的执行顺序，sequence表示的就是按照依赖数组的顺序执行，而parallel表示的就是所有依赖任务并行执行
+            "dependsOn": [
+                "Compilation c++ program",
+                "Run c++ program"
+            ], // 指定依赖任务
+        },
+        // 启动web服务器
+        {
+            "label": "Start LiveServer",
+            "type": "process",
+            "command": "code",
             "args": [
-                "-fdiagnostics-color=always",
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "detail": "调试器生成的任务。"
+                "--command",
+                "${input:startLiveServer}"
+            ]
+        },
+        // 停止web服务器
+        {
+            "label": "Stop LiveServer",
+            "type": "process",
+            "command": "code",
+            "args": [
+                "--command",
+                "${input:stopLiveServer}"
+            ]
+        },
+        // 复合任务，调用前面的任务，并提供一个选择运行任务的选择下拉框
+        {
+            "label": "Run",
+            "dependsOn" : ["${input:Run}"],
+            "presentation": { // 指定控制终端的显示方式
+                "echo": false, // 是否在终端中显示执行命令
+                "reveal": "never", // 控制何时自动显示终端面板，always表示任务执行时总是显示终端面板
+                "focus": false, // 当任务执行时是否聚焦到终端上
+                "panel": "shared", // 指定任务是哪个终端面板，dedicated表示的就是为每个任务创建独立的终端面板（但同一个任务会重用此终端面板），而 shared表示的就是多个任务共享同一终端面板
+                "showReuseMessage": false, // 指定当终端被重用是是否显示一则提示消息
+                "clear": true // 指定当任务执行前是否终端面板已有的内容
+            }
         }
     ],
-    "version": "2.0.0"
+    "inputs": [ // inputs是vscode任务系统中提供的一种变量注入机制，他能够在任务运行时动态的获取值，比如用户输入，选择选项，甚至可以调用其他vscode命令的执行结果然后插入到任务的命令或参数中，之后呢我们就可以通过 ${inputs:变量的id}就可以将其插入到任务中，并且啊inputs的command来支持使用vscode命令命令而在任务中是哦无法执行vscode命令的
+        {
+            "id": "startLiveServer", // 指定唯一标识
+            "type": "command", // 指定输入类型，而command表示的就是输入的值是一个vscode命令
+            "command": "extension.liveServer.goOnline" // extension.liveServer.goOnline表示的就是执行这个liveServer扩展的goOnline命令启动一个web服务器
+        },
+        {
+            "id": "stopLiveServer", // 指定唯一标识
+            "type": "command", // 指定输入类型，而command表示的就是输入的值是一个vscode命令
+            "command": "extension.liveServer.goOffline" // extension.liveServer.goOffline表示的就是执行这个liveServer扩展的goOnline命令关闭一个web服务器
+        },
+        {
+            "id": "Run", // 指定唯一标识
+            "type": "pickString", // 指定输入类型，而pickString表示的就是从预定义选项中选择一个值作为输入
+            "description": "Please select the task you want to run.", // 指定输入描述
+            "options": [
+                "Compilation c++ program",
+                "Run c++ program",
+                "Compilation and Run c++ program",
+                "Start LiveServer",
+                "Stop LiveServer"
+            ], // 指定预定义选项
+            "default": "Compilation and Run c++ program" // 设置默认选择的预定义选项
+        }
+    ]
 }

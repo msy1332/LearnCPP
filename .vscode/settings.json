@@ -1,3 +1,4 @@
 {
-    "files.autoGuessEncoding": false
+    "files.autoGuessEncoding": false,
+    "debug.javascript.debugByLinkOptions": "on"
 }
