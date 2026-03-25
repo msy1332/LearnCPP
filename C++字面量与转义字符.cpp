@@ -3,6 +3,7 @@
 using namespace std;
 int main()
 {
+
     // 数字字面量
     int decimal = 43; // 十进制
     int octal = 052;  // 八进制(以0开头)
